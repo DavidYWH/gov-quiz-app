@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: gov-quiz-app
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RENDER
+        value: true
+    healthCheckPath: /api/index
+    autoDeploy: true
