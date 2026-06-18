@@ -1,0 +1,16 @@
+{
+  "name": "gov-quiz-app",
+  "version": "1.0.0",
+  "description": "政务服务办事员答题系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
