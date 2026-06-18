@@ -1,0 +1,6 @@
+node_modules/
+data/users/
+data/history.json
+data/wrong-questions.json
+*.log
+.env
