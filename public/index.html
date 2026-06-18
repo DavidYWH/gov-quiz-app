@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>政务服务办事员答题系统</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <!-- 登录页 -->
+    <div id="page-login" class="page active">
+        <div class="login-container">
+            <div class="login-logo">📋</div>
+            <h1 class="login-title">政务服务办事员</h1>
+            <p class="login-subtitle">职业技能竞赛答题系统</p>
+            <div class="login-form">
+                <div class="form-group">
+                    <label>账号</label>
+                    <input type="text" id="login-username" placeholder="请输入账号（001-010）" maxlength="3">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" placeholder="请输入密码">
+                </div>
+                <div id="login-error" class="login-error" style="display:none;"></div>
+                <button class="login-btn" onclick="doLogin()">登 录</button>
+                <div class="login-hint">
+                    <p>初始账号：001～010</p>
+                    <p>初始密码：与账号相同</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主页 -->
+    <div id="page-home" class="page">
+        <div class="header">
+            <h1>答题系统</h1>
+            <p class="subtitle">政务服务办事员职业技能竞赛</p>
+            <button class="logout-btn" onclick="doLogout()">退出登录</button>
+        </div>
+        <div class="menu-user">
+            当前用户：<strong id="current-user">-</strong>
+        </div>
+        <div class="menu">
+            <div class="menu-item" onclick="showPage('question-bank')">
+                <div class="menu-icon">📝</div>
+                <div class="menu-text">题库练习</div>
+                <div class="menu-desc">选择题型和题集开始答题</div>
+            </div>
+            <div class="menu-item" onclick="showPage('history')">
+                <div class="menu-icon">📊</div>
+                <div class="menu-text">历史答题记录</div>
+                <div class="menu-desc">查看过往答题记录</div>
+            </div>
+            <div class="menu-item" onclick="showPage('wrong')">
+                <div class="menu-icon">❌</div>
+                <div class="menu-text">错题集</div>
+                <div class="menu-desc">巩固练习错题</div>
+            </div>
+            <div class="menu-item" onclick="showPage('add-question')">
+                <div class="menu-icon">➕</div>
+                <div class="menu-text">新增题目</div>
+                <div class="menu-desc">手动添加或批量上传题目</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 题库选择页 -->
+    <div id="page-question-bank" class="page">
+        <div class="header">
+            <button class="back-btn" onclick="showPage('home')">← 返回</button>
+            <h1>选择题库</h1>
+        </div>
+        <div class="type-selector">
+            <button class="type-btn active" data-type="single" onclick="selectType('single')">单选题</button>
+            <button class="type-btn" data-type="multi" onclick="selectType('multi')">多选题</button>
+            <button class="type-btn" data-type="tf" onclick="selectType('tf')">判断题</button>
+        </div>
+        <div id="set-list" class="set-list"></div>
+    </div>
+
+    <!-- 答题页面 -->
+    <div id="page-quiz" class="page">
+        <div class="header quiz-header">
+            <button class="back-btn" onclick="confirmExitQuiz()">✕ 退出</button>
+            <div class="quiz-progress">
+                <span id="current-q">1</span> / <span id="total-q">0</span>
+            </div>
+            <button class="card-btn" onclick="showAnswerCard()">答题卡</button>
+        </div>
+        <div class="quiz-body">
+            <div id="question-text" class="question-text"></div>
+            <div id="options-list" class="options-list"></div>
+            <div id="answer-area" class="answer-area" style="display:none;">
+                <div class="correct-answer">正确答案：<span id="correct-answer-text"></span></div>
+                <div id="explanation-text" class="explanation-text"></div>
+            </div>
+            <div class="quiz-actions">
+                <button id="btn-mark" class="action-btn mark-btn" onclick="toggleMark()">标记</button>
+                <button id="btn-show-answer" class="action-btn" onclick="showAnswer()">查看答案</button>
+            </div>
+        </div>
+        <div class="quiz-footer">
+            <button class="nav-btn" onclick="prevQuestion()">上一题</button>
+            <button class="nav-btn primary" onclick="nextQuestion()">下一题</button>
+        </div>
+        <div class="quiz-footer-2">
+            <button class="submit-btn" onclick="confirmSubmit()">交卷</button>
+        </div>
+    </div>
+
+    <!-- 答题卡弹窗 -->
+    <div id="answer-card-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>答题卡</h2>
+                <button onclick="closeAnswerCard()" class="close-btn">✕</button>
+            </div>
+            <div id="answer-card-grid" class="answer-card-grid"></div>
+            <div class="card-legend">
+                <span class="legend-item"><span class="dot done"></span>已做</span>
+                <span class="legend-item"><span class="dot undone"></span>未做</span>
+                <span class="legend-item"><span class="dot marked"></span>标记</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 交卷确认弹窗 -->
+    <div id="submit-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>确认交卷</h2>
+            </div>
+            <div id="submit-summary" class="submit-summary"></div>
+            <div class="modal-actions">
+                <button onclick="closeSubmitModal()" class="action-btn">继续答题</button>
+                <button onclick="submitQuiz()" class="action-btn primary">确认交卷</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果页面 -->
+    <div id="page-result" class="page">
+        <div class="header">
+            <button class="back-btn" onclick="showPage('home')">← 返回</button>
+            <h1>答题结果</h1>
+        </div>
+        <div class="result-summary">
+            <div class="result-score">
+                <span id="result-correct">0</span> / <span id="result-total">0</span>
+            </div>
+            <div class="result-label">正确率：<span id="result-rate">0%</span></div>
+        </div>
+        <div class="result-actions">
+            <button class="action-btn" onclick="reviewWrong()">查看错题</button>
+            <button class="action-btn" onclick="retryQuiz()">再练一次</button>
+            <button class="action-btn primary" onclick="showAnswerCardResult()">查看答题卡</button>
+        </div>
+        <div class="result-actions" style="margin-top:0;">
+            <button class="action-btn" onclick="goHome()">返回首页</button>
+        </div>
+        <div id="result-card" class="result-card" style="display:none;">
+            <h3>答题卡</h3>
+            <div id="result-card-grid" class="answer-card-grid"></div>
+            <div class="card-legend">
+                <span class="legend-item"><span class="dot correct"></span>正确</span>
+                <span class="legend-item"><span class="dot wrong"></span>错误</span>
+                <span class="legend-item"><span class="dot unanswered"></span>未答</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史记录页 -->
+    <div id="page-history" class="page">
+        <div class="header">
+            <button class="back-btn" onclick="showPage('home')">← 返回</button>
+            <h1>历史答题记录</h1>
+        </div>
+        <div id="history-list" class="history-list"></div>
+        <div id="history-empty" class="empty-state" style="display:none;">
+            <p>暂无答题记录</p>
+        </div>
+    </div>
+
+    <!-- 历史详情页 -->
+    <div id="page-history-detail" class="page">
+        <div class="header">
+            <button class="back-btn" onclick="showPage('history')">← 返回</button>
+            <h1>答题详情</h1>
+        </div>
+        <div id="history-detail-content"></div>
+    </div>
+
+    <!-- 错题集页 -->
+    <div id="page-wrong" class="page">
+        <div class="header">
+            <button class="back-btn" onclick="showPage('home')">← 返回</button>
+            <h1>错题集</h1>
+        </div>
+        <div id="wrong-list" class="wrong-list"></div>
+        <div id="wrong-empty" class="empty-state" style="display:none;">
+            <p>暂无错题</p>
+            <p class="sub">好好练习，争取保持！</p>
+        </div>
+    </div>
+
+    <!-- 新增题目页 -->
+    <div id="page-add-question" class="page">
+        <div class="header">
+            <button class="back-btn" onclick="showPage('home')">← 返回</button>
+            <h1>新增题目</h1>
+        </div>
+        <div class="tab-selector">
+            <button class="tab-btn active" onclick="switchAddTab('single')">单题添加</button>
+            <button class="tab-btn" onclick="switchAddTab('batch')">批量上传</button>
+        </div>
+
+        <!-- 单题添加 -->
+        <div id="add-single" class="add-form">
+            <div class="form-group">
+                <label>题型</label>
+                <select id="add-type" onchange="updateAddForm()">
+                    <option value="single">单选题</option>
+                    <option value="multi">多选题</option>
+                    <option value="tf">判断题</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>题目</label>
+                <textarea id="add-question" placeholder="请输入题目内容"></textarea>
+            </div>
+            <div id="add-options">
+                <div class="form-group">
+                    <label>A. </label>
+                    <input type="text" id="add-option-a" placeholder="选项A">
+                </div>
+                <div class="form-group">
+                    <label>B. </label>
+                    <input type="text" id="add-option-b" placeholder="选项B">
+                </div>
+                <div class="form-group">
+                    <label>C. </label>
+                    <input type="text" id="add-option-c" placeholder="选项C">
+                </div>
+                <div class="form-group">
+                    <label>D. </label>
+                    <input type="text" id="add-option-d" placeholder="选项D">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>正确答案</label>
+                <input type="text" id="add-answer" placeholder="单选题/判断题填A/B/C/D，多选题填AB/ABC等">
+            </div>
+            <div class="form-group">
+                <label>解析（可选）</label>
+                <textarea id="add-explanation" placeholder="请输入题目解析"></textarea>
+            </div>
+            <button class="action-btn primary" onclick="submitSingleQuestion()">提交题目</button>
+        </div>
+
+        <!-- 批量上传 -->
+        <div id="add-batch" class="add-form" style="display:none;">
+            <div class="form-group">
+                <label>题型</label>
+                <select id="batch-type">
+                    <option value="single">单选题</option>
+                    <option value="multi">多选题</option>
+                    <option value="tf">判断题</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>题目格式说明</label>
+                <div class="format-hint">
+                    <p>每行一题，格式如下：</p>
+                    <pre>题目内容
+A.选项A
+B.选项B
+C.选项C
+D.选项D
+答案：A
+
+题目内容2
+A.选项A
+B.选项B
+答案：B</pre>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>批量粘贴题目</label>
+                <textarea id="batch-text" placeholder="请按格式粘贴题目..." rows="15"></textarea>
+            </div>
+            <button class="action-btn primary" onclick="submitBatchQuestions()">批量提交</button>
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
