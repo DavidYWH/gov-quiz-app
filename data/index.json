@@ -1,0 +1,14 @@
+{
+  "single": {
+    "count": 724,
+    "sets": 8
+  },
+  "multi": {
+    "count": 935,
+    "sets": 10
+  },
+  "tf": {
+    "count": 307,
+    "sets": 4
+  }
+}
